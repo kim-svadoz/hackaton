@@ -1,0 +1,26 @@
+{% extends 'base_accounts1.html' %}
+{% load bootstrap4 %}
+
+{% block body %}
+<form action="" method="POST">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+  <div style="float: left;">
+    {% buttons %}
+    <button type="submit" class="btn btn-primary" style="font-size: 20px;">
+      회원 수정
+    </button>
+    {% endbuttons %}
+</div>
+
+  <div style="float: right;">
+    <a href="{% url 'accounts:index' %}">
+      {% buttons %}
+      <button type="button" class="btn btn-primary" style="font-size: 20px;">
+        back
+    </button>
+      {% endbuttons %}
+    </a>
+  </div>
+</form>
+{% endblock %}

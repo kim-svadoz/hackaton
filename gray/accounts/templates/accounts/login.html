@@ -1,0 +1,27 @@
+{% extends 'base_accounts1.html' %}
+{% load socialaccount %}
+{% load bootstrap4 %}
+{% block body %}
+<h1>로그인</h1>
+<form action="" method="POST">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+
+  <div>
+    <div style="float: left; margin-right: 10px;">
+      {% buttons %}
+      <button type="submit" class="btn btn-primary" style="font-size: 30px;">
+        로그인
+      </button>
+      {% endbuttons %}
+    </div>
+
+    <a href="{% provider_login_url 'kakao' method='oauth2' %}" class="btn btn-primary" style="font-size: 10px;">kakao allauth</a>
+
+    <a href="{% url 'accounts:signup' %}" class="btn btn-primary" style="font-size: 30px;">회원가입</a>
+
+    <a href="{% url 'accounts:index' %}" class="btn btn-primary" style="float:right; font-size: 30px;">back</a>
+  </div>  
+
+</form>
+{% endblock %}

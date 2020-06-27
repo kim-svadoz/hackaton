@@ -1,0 +1,30 @@
+{% extends 'base_accounts1.html' %}
+{% load bootstrap4 %}
+
+{% block body %}
+<div class="container">
+  <div class="row">
+    <div class="col-3">
+      <h1>
+        {% if person.profile.image %}
+        <img src="{{ person.profile.image.url }}" width=70, alt="{{ person.profile.image }}">
+        {% endif %}
+        {{ person.username }}
+      </h1>
+    </div>
+
+    <div class="col-9">
+      <div>
+        <strong>{{ person.profile.nickname }}</strong>
+      </div>
+      <div>
+        {{ person.profile.introduction }}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  <a href="{% url 'accounts:profile_update' %}" class="btn btn-primary" style="font-size: 20px;">프로필 수정하기</a>
+  <a href="{% url 'accounts:index' %}" class="btn btn-primary" style="float: right; font-size: 20px;">back</a>
+{% endblock %}

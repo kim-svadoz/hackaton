@@ -1,0 +1,20 @@
+{% extends 'base_accounts1.html' %}
+{% load bootstrap4 %}
+{% block body %}
+<h1> Profile Update</h1>
+
+<form action="" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+
+  <div>
+    {% buttons %}
+      <button type="submit" class="btn btn-primary" style="float:left; font-size: 20px;">
+        Submit
+      </button>
+    {% endbuttons %}
+
+    <a href="{% url 'accounts:index' %}" class="btn btn-primary" style="float: right; font-size: 20px;">back</a>
+</div>
+</form>
+{% endblock %}
