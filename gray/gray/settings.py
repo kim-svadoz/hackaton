@@ -35,7 +35,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 
     # `allauth` specific authentication methods, such as login by e-mail
-    # 'allauth.account.auth_backends.AuthenticationBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 INSTALLED_APPS = [
@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.kakao',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -148,3 +149,18 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 SITE_ID = 2
 LOGIN_REDIRECT_URL = 'accounts:index'
+
+# Provider specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': '688111546591-hof5c1f64va4cru9kviurq5df8m64vst.apps.googleusercontent.com',
+            'secret': 'hKYn3Ul8aB8vD8NsoDD1cMz-',
+            'key': ''
+        }
+    }
+}
+
