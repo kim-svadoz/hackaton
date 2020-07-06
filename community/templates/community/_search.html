@@ -1,0 +1,217 @@
+<div class="row p-5">
+  <div class="col-xl-6 ">
+    <h2>검색결과</h2>
+  </div>
+  <div class="col-xl-6"></div>
+  <div class="col-xl-6"></div>
+  <div class="col-xl-6">
+    <form class="form-inline my-2 my-md-0  float-xl-right" method="get" onsubmit="return search_all(this)">
+      <input class="form-control" type="text" placeholder="Search" aria-label="Search" name="search"
+        value="{{search}}">
+    </form>
+  </div>
+</div>
+
+<span>
+  <div class="table-responsive px-5">
+    <table class="table" style="font-size: 1vmax">
+      <thead>
+        <tr>
+          <th width="5%" style="text-align: center">#</th>
+          <th width="45%">제목</th>
+          <th width="15%" style="text-align: center">작성자</th>
+          <th width="15%" style="text-align: center">작성일</th>
+          <th width="10%" style="text-align: center">조회수</th>
+          <th width="10%" style="text-align: center">좋아요</th>
+        </tr>
+      </thead>
+      <tbody id="mydatalist3">
+      </tbody>
+    </table>
+    <btn id="i_search_all_more" class="btn btn-primary btn-block" onclick="search_all_more()"
+      style="visibility: hidden;">더 보기</btn>
+    <btn id="i_search_popular_more" class="btn btn-primary btn-block" onclick="search_popular_more()"
+      style="visibility: hidden;">더 보기</btn>
+  </div>
+
+</span>
+<script>
+  var len;
+  var temp_data;
+  function search_all(frm) {
+    table = ""
+    len = 10;
+    $.ajax({
+      cache: false,
+      url: "{% url 'community:all_search' %}",
+      type: "get",
+      data: $(frm).serialize(),
+      success: function (data) {
+        document.getElementById('i_search_all_more').setAttribute('style', 'visibility: visible')
+        document.getElementById('i_search_popular_more').setAttribute('style', 'visibility: hidden')
+        document.getElementById('a_community_search_all').click()
+        temp_data = data;
+        if (len >= data['articles'].length) {
+          len = data['articles'].length;
+        }
+        for (i = 0; i < len; i++) {
+          table += "<tr align='center' style='border-bottom: 1px solid #a8afad;'>"
+            + "<td>" + data['articles'][i]['id'] + "</td>"
+            + "<td align='left'><a class='text-dark' id='comment_title_" + i + "' href='javascript:article_detail(" + data['articles'][i]['id'] + ")' style='text-decoration: none;'>" + data['articles'][i]['title']
+            + "<b style='color: red;'> [" + data['articles'][i]['comments'] + "]</b></a></td>"
+            + "<td><a class='text-dark' href='javascript:profile(" + data['articles'][i]['user'] + ")' style='text-decoration: none;' id='article_user_name_"+i+"'>" + data['articles'][i]['user'] + "</a></td>"
+            + "<td>" + data['articles'][i]['date'] + "</td>"
+            + "<td>" + data['articles'][i]['hits'] + "</td>"
+            + "<td>" + data['articles'][i]['likes'] + "</td>"
+        }
+        document.getElementById('mydatalist3').innerHTML = table
+        for (i = 0; i < len; i++) {
+          const titleTag = document.getElementById('comment_title_' + i)
+          titleTag.innerText = data['articles'][i]['title']
+          titleTag.setAttribute('href',`javascript:detail(${data['articles'][i]['id']},'${data['articles'][i]['title']}')`)
+          const b = document.createElement('b')
+          b.innerText = ` [${data['articles'][i]['comments']}]`
+          b.style.color = 'red'
+          titleTag.appendChild(b)
+          const userTag = document.getElementById('article_user_name_'+i)
+          userTag.setAttribute('href',`javascript:profile('${data['articles'][i]['user']}')`)
+          if(data['articles'][i]['nickname']){
+            userTag.innerText = data['articles'][i]['nickname']
+          }
+        }
+      }
+
+    })
+    return false;
+  }
+  function search_all_more() {
+    table = ""
+    len += 10;
+
+    $.ajax({
+      cache: false,
+      success: function (data) {
+        if (len >= temp_data['articles'].length) {
+          len = temp_data['articles'].length;
+        }
+        for (i = 0; i < len; i++) {
+          table += "<tr align='center' style='border-bottom: 1px solid #a8afad;'>"
+            + "<td>" + temp_data['articles'][i]['id'] + "</td>"
+            + "<td align='left'><a class='text-dark' id='comment_title_" + i + "' href='javascript:article_detail(" + temp_data['articles'][i]['id'] + ")' style='text-decoration: none;'>" + temp_data['articles'][i]['title']
+            + "<b style='color: red;'> [" + temp_data['articles'][i]['comments'] + "]</b></a></td>"
+            + "<td><a class='text-dark' href='javascript:profile(" + temp_data['articles'][i]['user'] + ")' style='text-decoration: none;' id='article_user_name_"+i+"'>" + temp_data['articles'][i]['user'] + "</a></td>"
+            + "<td>" + temp_data['articles'][i]['date'] + "</td>"
+            + "<td>" + temp_data['articles'][i]['hits'] + "</td>"
+            + "<td>" + temp_data['articles'][i]['likes'] + "</td>"
+        }
+        document.getElementById('mydatalist3').innerHTML = ""
+        document.getElementById('mydatalist3').innerHTML = table
+        for (i = 0; i < len; i++) {
+          const titleTag = document.getElementById('comment_title_' + i)
+          titleTag.innerText = temp_data['articles'][i]['title']
+          titleTag.setAttribute('href',`javascript:detail(${temp_data['articles'][i]['id']},'${temp_data['articles'][i]['title']}')`)
+          const b = document.createElement('b')
+          b.innerText = ` [${temp_data['articles'][i]['comments']}]`
+          b.style.color = 'red'
+          titleTag.appendChild(b)
+          const userTag = document.getElementById('article_user_name_'+i)
+          userTag.setAttribute('href',`javascript:profile('${temp_data['articles'][i]['user']}')`)
+          if(temp_data['articles'][i]['nickname']){
+            userTag.innerText = temp_data['articles'][i]['nickname']
+          }
+        }
+      }
+    })
+  }
+</script>
+
+
+<script>
+  var len;
+  var temp_data;
+  function search_popular(frm) {
+    table = ""
+    len = 10;
+    $.ajax({
+      cache: false,
+      url: "{% url 'community:popular_search' %}",
+      type: "get",
+      data: $(frm).serialize(),
+      success: function (data) {
+        document.getElementById('i_search_all_more').setAttribute('style', 'visibility: hidden')
+        document.getElementById('i_search_popular_more').setAttribute('style', 'visibility: visible')
+        document.getElementById('a_community_search_all').click()
+        temp_data = data;
+        if (len >= data['articles'].length) {
+          len = data['articles'].length;
+        }
+        for (i = 0; i < len; i++) {
+          table += "<tr align='center' style='border-bottom: 1px solid #a8afad;'>"
+            + "<td>" + data['articles'][i]['id'] + "</td>"
+            + "<td align='left'><a class='text-dark' id='comment_title_" + i + "' href='javascript:article_detail(" + data['articles'][i]['id'] + ")' style='text-decoration: none;'>" + data['articles'][i]['title']
+            + "<b style='color: red;'> [" + data['articles'][i]['comments'] + "]</b></a></td>"
+            + "<td><a class='text-dark' href='javascript:profile(" + data['articles'][i]['user'] + ")' style='text-decoration: none;' id='article_user_name_"+i+"'>" + data['articles'][i]['user'] + "</a></td>"
+            + "<td>" + data['articles'][i]['date'] + "</td>"
+            + "<td>" + data['articles'][i]['hits'] + "</td>"
+            + "<td>" + data['articles'][i]['likes'] + "</td>"
+        }
+        document.getElementById('mydatalist3').innerHTML = table
+        for (i = 0; i < len; i++) {
+          const titleTag = document.getElementById('comment_title_' + i)
+          titleTag.innerText = data['articles'][i]['title']
+          titleTag.setAttribute('href',`javascript:detail(${data['articles'][i]['id']},'${data['articles'][i]['title']}')`)
+          const b = document.createElement('b')
+          b.innerText = ` [${data['articles'][i]['comments']}]`
+          b.style.color = 'red'
+          titleTag.appendChild(b)
+          const userTag = document.getElementById('article_user_name_'+i)
+          userTag.setAttribute('href',`javascript:profile('${data['articles'][i]['user']}')`)
+          if(data['articles'][i]['nickname']){
+            userTag.innerText = data['articles'][i]['nickname']
+          }
+        }
+      }
+
+    })
+    return false;
+  }
+  function search_popular_more() {
+    table = ""
+    len += 10;
+
+    $.ajax({
+      cache: false,
+      success: function (data) {
+        if (len >= temp_data['articles'].length) {
+          len = temp_data['articles'].length;
+        }
+        for (i = 0; i < len; i++) {
+          table += "<tr align='center' style='border-bottom: 1px solid #a8afad;'>"
+            + "<td>" + temp_data['articles'][i]['id'] + "</td>"
+            + "<td align='left'><a class='text-dark' id='comment_title_" + i + "' href='javascript:article_detail(" + temp_data['articles'][i]['id'] + ")' style='text-decoration: none;'>" + temp_data['articles'][i]['title']
+            + "<b style='color: red;'> [" + temp_data['articles'][i]['comments'] + "]</b></a></td>"
+            + "<td><a class='text-dark' href='javascript:profile(" + temp_data['articles'][i]['user'] + ")' style='text-decoration: none;' id='article_user_name_"+i+"'>" + temp_data['articles'][i]['user'] + "</a></td>"
+            + "<td>" + temp_data['articles'][i]['date'] + "</td>"
+            + "<td>" + temp_data['articles'][i]['hits'] + "</td>"
+            + "<td>" + temp_data['articles'][i]['likes'] + "</td>"
+        }
+        document.getElementById('mydatalist3').innerHTML = ""
+        document.getElementById('mydatalist3').innerHTML = table
+        for (i = 0; i < len; i++) {
+          const titleTag = document.getElementById('comment_title_' + i)
+          titleTag.innerText = temp_data['articles'][i]['title']
+          titleTag.setAttribute('href',`javascript:detail(${temp_data['articles'][i]['id']},'${temp_data['articles'][i]['title']}')`)
+          const b = document.createElement('b')
+          b.innerText = ` [${temp_data['articles'][i]['comments']}]`
+          b.style.color = 'red'
+          titleTag.appendChild(b)
+          const userTag = document.getElementById('article_user_name_'+i)
+          userTag.setAttribute('href',`javascript:profile('${temp_data['articles'][i]['user']}')`)
+          if(temp_data['articles'][i]['nickname']){
+            userTag.innerText = temp_data['articles'][i]['nickname']
+          }
+        }
+      }
+    })
+  }
+</script>

@@ -1,0 +1,51 @@
+{% load bootstrap4 %}
+<div class="container">
+  <div class="row pt-5 px-5">
+    <div class="col-xl-12">
+      <h1>글 생성</h1>
+    </div>
+  </div>
+  <div class="row p-5">
+    <div class="col-xl-12">
+      <form action="" onsubmit="return community_create(this)" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <textarea id="resume_article" name="content"></textarea>
+        <script>
+          $('#resume_article').summernote(
+            {
+              placeholder: '',
+              disableDragAndDrop: true,
+              tabsize: 2,
+              height: 400,
+              focus: true,
+            }
+          );
+        </script>
+        <br />
+        <div class="row">
+          <div class="col-xl-12 text-right">
+            {% buttons %}
+            <a class="btn btn-primary" href="javascript:index()">취소</a>
+            <button type="submit" class="btn btn-primary">작성완료</button>
+            {% endbuttons %}
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    function community_create(frm) {
+      $.ajax({
+        url: "{% url 'community:create' %}",
+        type: "POST",
+        data: $(frm).serialize(),
+        success: function (data) {
+          document.getElementById('a_community_all').click()
+          all_paging(1)
+        }
+      })
+      return false;
+    }
+  </script>
+</div>

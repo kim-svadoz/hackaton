@@ -1,0 +1,84 @@
+<div class="row pt-5">
+  <div class="col-xl-6">
+    <textarea id="spell_check" name="content"></textarea>
+    <script>
+      $('#spell_check').summernote({
+        placeholder: '맞춤법 검사를 원하는 단어나 문장을 입력해 주세요. 최대 500자',
+        disableDragAndDrop: true,
+        toolbar: false,
+        tabsize: 2,
+        height: 400,
+        focus: true,
+        callbacks: {
+          onKeydown: function (e) {
+            var t = e.currentTarget.innerText;
+            if (t.trim().length >= 500) {
+              //delete key
+              if (e.keyCode != 8)
+                e.preventDefault();
+            }
+          },
+          onKeyup: function (e) {
+            var t = e.currentTarget.innerText;
+            $('#maxContentPost').text(500 - t.trim().length);
+          },
+          onPaste: function (e) {
+            var t = e.currentTarget.innerText;
+            var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+            e.preventDefault();
+            var all = t + bufferText;
+            document.execCommand('insertText', false, all.trim().substring(0, 500));
+            $('#maxContentPost').text(500 - t.length);
+          }
+        }
+      });
+    </script>
+    {% csrf_token %}
+    <br>
+    <button class="btn btn-primary float-right" type="button" onclick="spell_check()">검사하기</button>
+  </div>
+  <div class="col-xl-6">
+    <textarea id="spell_check_result" name="content"></textarea>
+    <script>
+      $('#spell_check_result').summernote(
+
+        {
+          placeholder: '결과 화면입니다.',
+          toolbar: false,
+          disableDragAndDrop: true,
+          tabsize: 2,
+          height: 400,
+          focus: true,
+        }
+      );
+    </script>
+  </div>
+</div>
+
+
+<script>
+  function spell_check() {
+    var text = "";
+
+    for (var i = 0; i < document.getElementsByClassName('note-editable')[0].getElementsByTagName('p').length; i++) {
+      text += document.getElementsByClassName('note-editable')[0].getElementsByTagName('p')[i].innerText + "\n"
+    }
+    $.ajax({
+      beforeSend: function (xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+          xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+      },
+
+      url: "{% url 'analysis:spell_check' %}",
+      type: "post",
+      data: {
+        'data': text,
+      },
+      success: function (data) {
+        document.getElementsByClassName('note-placeholder')[1].textContent = ""
+        document.getElementsByClassName('note-editable')[1].getElementsByTagName('p')[0].innerHTML = data['checked']
+      }
+    })
+  }
+</script>

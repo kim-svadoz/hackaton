@@ -1,0 +1,11 @@
+
+<p class="card-text">
+  <span class="mr-3"><i class="far fa-comment"></i>   {{ article.comment_set.all|length }}</span>
+  <!-- Like -->
+  {% if user in article.like_users.all %}
+      <i class="fas fa-heart fa-lg like-button" data-id="{{ article.id }}" style="color: crimson;"></i>
+  {% else %}
+      <i class="far fa-heart fa-lg like-button" data-id="{{ article.id }}" style="color: black;"></i>
+  {% endif %}
+  <span class="like-count-{{ article.id }}">{{ article.like_users.count }}</span>
+</p>

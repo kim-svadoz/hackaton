@@ -1,0 +1,166 @@
+{% extends 'base_accounts1.html' %}
+{% load static %}
+{% load bootstrap4 %}
+{% block head %}
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+  integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+  integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+  integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+<!-- summernote -->
+<link href="{% static 'summernote-0.8.18-dist/summernote-bs4.min.css' %}" rel="stylesheet">
+<script src="{% static 'summernote-0.8.18-dist/summernote-bs4.min.js' %}"></script>
+<script src="https://kit.fontawesome.com/cfae7cf239.js" crossorigin="anonymous"></script>
+<style>
+  #id_content {
+    height: 100px;
+    width: inherit;
+  }
+
+  #f .form-group {
+    margin-bottom: 0px;
+    width: 100%;
+  }
+</style>
+{% endblock %}
+{% block body %}
+<!-- <div class="tab-pane container fade" id="community_popular"> -->
+<div class="tab-pane container" id="community_popular">
+  <div class="row p-5">
+    {% if user == article.user %}
+    <div class="col-xl-2">
+      <a class="btn btn-primary btn-block" href="{% url 'community:update' article.pk %}">수정</a>
+    </div>
+    <div class="col-xl-2">
+      <form action="{% url 'community:delete' article.pk %}" method="POST">
+        {% csrf_token %}
+        <input type="submit" value="삭제" class="btn btn-primary btn-block">
+      </form>
+    </div>
+    <div class="col-xl-2"></div>
+    {% else %}
+    <div class="col-xl-6"></div>
+    {% endif %}
+    <div class="col-xl-4"></div>
+    <div class="col-xl-2" align="right">
+      <a class="btn btn-primary" href="javascript:close()">나가기</a>
+    </div>
+    <div class="container-fluid mt-3 rounded-lg" style="border: solid 1px black; padding: 3% 3%;">
+      <div class="row">
+        <div class="col-xl-8">
+          <p class="lead" style="font-size: 1.6vmax; font-weight: bolder;">{{ article.title }}</p>
+        </div>
+        <div class="col-xl-4">
+          <p style="text-align :right;">
+            <kbd style="background-color: gray; font-weight: bold;">전체공개</kbd> <span class=""
+              style=" font-size: 1vmax;">&nbsp;&nbsp;&nbsp;<td>{{ article.date }}</td></span>
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-4">
+          <span><i class="fa fa-user-circle fa-2x" aria-hidden="true"></i></span>
+          {% if article.user.profile.nickname %}
+          <span style="font-weight: bolder;">{{ article.user.profile.nickname }}</span>
+          {% else %}
+          <span style="font-weight: bolder;">{{ article.user }}</span>
+          {% endif %}
+          <span style="color: gray;"> 일반멤버</span>
+
+        </div>
+        <div class="col-xl-3"></div>
+        <div class="col-xl-5" align="right">
+          <span style="font-size: 0.8vmax;">{{request.get_full_path }}</span>
+          <kbd type="button" onclick="copyToClipboard('{{request.build_absolute_uri}}')"
+            style="background-color: white; border: none 1px; color: black; font-weight: bold; font-size: 0.9vmax;">주소복사</kbd>
+        </div>
+      </div>
+
+      <br />
+      <div class="row">
+        <div class="col-xl-12">
+          {{ article.content|safe }}
+        </div>
+        <br /><br />
+        {% if article.image %}
+        <img src="{{ article.image.url }}" alt="{{ article.image }}">
+        {% endif %}
+      </div>
+      <div class="row">
+        <div class="col-xl-10" align="left">
+          {% include 'community/_like.html' %}
+        </div>
+        <div class="col-xl-2"></div>
+      </div>
+    </div>
+    <div class="container-fluid mt-5 rounded-lg" style="padding: 3% 3%; background-color: rgb(244, 244, 244);">
+
+
+
+      <!-- 댓글 시작-->
+      {% for comment in comments %}
+      <div class="row">
+        <div class="col-xl-1">
+          <span><i class="fa fa-user-circle fa-2x" aria-hidden="true"></i></span>
+        </div>
+        <div class="col-xl-9">
+          {% if comment.user.profile.nickname %}
+          <span style="font-size: 1.1vmax;">{{ comment.user.profile.nickname }}</span>
+          {% else %}
+          <span style="font-size: 1.1vmax;">{{ comment.user }}</span>
+          {% endif %}
+
+
+          <span class="align-bottom" style="font-size: 0.8vmax;">{{ comment.created_at|date:'Y/n/j' }}</span>
+          <br>
+          <span>{{ comment.content }}</span>
+        </div>
+        <div class="col-xl-2 text-right">
+          {% include 'community/_selectComment.html' %}
+          {% if comment.user.username == user.username %}
+          <form action="{% url 'community:comment_delete' article.pk comment.pk %}" method="POST">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">삭제</button>
+          </form>
+          {% endif %}
+        </div>
+
+      </div>
+      <hr>
+      {% empty %}
+      <p>댓글이 없습니다.</p>
+      {% endfor %}
+
+      <form action="{% url 'community:comment_create' article.pk %}" method="POST">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-xl-12 d-flex justify-content-between" id="f">
+            {% bootstrap_form comment_form %}
+            <input class="btn btn-primary" type="submit" value="댓글생성">
+          </div>
+        </div>
+      </form>
+      <hr>
+      <script>
+        function copyToClipboard(val) {
+          var t = document.createElement("textarea");
+          document.body.appendChild(t);
+          t.value = val;
+          t.select();
+          document.execCommand('copy');
+          document.body.removeChild(t);
+        }
+      </script>
+      <script src="{% static 'community/js/like.js' %}"></script>
+      <script src="{% static 'community/js/selectComment.js' %}"></script>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

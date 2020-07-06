@@ -1,0 +1,189 @@
+<div class="row p-5">
+  <div class="col-xl-6 ">
+    <h2>자소서 첨삭 게시판</h2>
+  </div>
+  <div class="col-xl-6"></div>
+  <div class="col-xl-6"></div>
+  <div class="col-xl-6">
+    <form class="form-inline my-2 my-md-0  float-xl-right" method="get" onsubmit="return search_all(this)">
+      <input class="form-control" type="text" placeholder="Search" aria-label="Search" name="search" value="{{search}}">
+    </form>
+  </div>
+</div>
+
+<span>
+  <div class="table-responsive px-5">
+    <table class="table" style="font-size: 1vmax">
+      <thead>
+        <tr>
+          <th width="5%" style="text-align: center">#</th>
+          <th width="45%">제목</th>
+          <th width="15%" style="text-align: center">작성자</th>
+          <th width="15%" style="text-align: center">작성일</th>
+          <th width="10%" style="text-align: center">조회수</th>
+          <th width="10%" style="text-align: center">좋아요</th>
+        </tr>
+      </thead>
+      <tbody id="mydatalist">
+        {% for article in articles %}
+        <tr align="center" style="border-bottom: 1px solid #a8afad;">
+          <td>{{ article.pk }}</td>
+          <td align="left"><a class="text-dark" href="javascript:detail({{article.pk}}, '{{article.title}}')"
+              style="text-decoration: none;">{{ article.title }} <b
+                style="color: red;">[{{  article.comment_set.all|length }}]</b></a>
+          </td>
+          {% if article.user.profile.nickname %}
+          <td><a class="text-dark" href="javascript:profile('{{article.user}}')"
+              style="text-decoration: none;">{{ article.user.profile.nickname }}</a></td>
+          {% else %}
+          <td><a class="text-dark" href="javascript:profile('{{article.user}}')"
+            style="text-decoration: none;">{{ article.user }}</a></td>
+          {% endif %}
+          <td>{{ article.updated_at|date:'Y/n/j' }}</td>
+          <td>{{ article.hits }}</td>
+          <td>{{ article.like_users.all|length }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div style=" text-align: right;">
+      <a class="btn btn-primary" href="javascript:community_form()">글 작성하기</a>
+    </div>
+
+    <!-- pagenator -->
+    <ul id="board_all" class="pagination justify-content-center" style="margin:20px 0">
+      {% if page <= 3  %}
+      <li class="page-item disabled"><a class="page-link">Previous</a></li>
+      {% for num in articles.paginator.page_range %}
+      {% if num <= 5 %}
+      {% if page == num %}
+      <li class="page-item active"><a class="page-link" href="javascript:all_paging({{num}})">{{ num }}</a></li>
+      {% else %}
+      <li class="page-item"><a class="page-link" href="javascript:all_paging({{num}})">{{ num }}</a></li>
+      {% endif %}
+      {% endif %}
+      {% endfor %}
+      <li class="page-item"><a class="page-link" href="javascript:all_paging(6)">Next</a>
+      </li>
+
+      {% elif page >= end_page %}
+      <li class="page-item"><a class="page-link" href="javascript:all_paging({{ page|add:'-3'}})">Previous</a></li>
+      {% for num in articles.paginator.page_range %}
+      {% if num >= end_page|add:-2 %}
+      {% if page == num %}
+      <li class="page-item active"><a class="page-link" href="javascript:all_paging({{num}})">{{ num }}</a></li>
+      {% else %}
+      <li class="page-item"><a class="page-link" href="javascript:all_paging({{num}})">{{ num }}</a></li>
+      {% endif %}
+      {% endif %}
+      {% endfor %}
+      <li class="page-item disabled"><a class="page-link" href="">Next</a>
+      </li>
+      {% else %}
+      <li class="page-item"><a class="page-link" href="javascript:all_paging({{ page|add:'-3'}})">Previous</a></li>
+      {% for num in articles.paginator.page_range %}
+      {% if page >= num|add:'-2' and page <= num|add:'2' %}
+      {% if page == num %}
+      <li class="page-item active"><a class="page-link" href="javascript:all_paging({{num}})">{{ num }}</a></li>
+      {% else %}
+      <li class="page-item"><a class="page-link" href="javascript:all_paging({{num}})">{{ num }}</a></li>
+      {% endif %}
+      {% endif %}
+      {% endfor %}
+
+      <li class="page-item"><a class="page-link" href="javascript:all_paging({{ page|add:'3'}})">Next</a>
+      </li>
+      {% endif %}
+
+    </ul>
+  </div>
+</span>
+<script>
+  function all_paging(page) {
+    paging = ""
+    table = ""
+    $.ajax({
+      cache: false,
+      url: "{% url 'community:all_paging' %}",
+      type: "get",
+      data: {
+        'page': page,
+      },
+      success: function (data) {
+        if (page <= 3) {
+          paging += "<li class='page-item disabled'><a class='page-link'>Previous</a></li>"
+          for (num = 1; num <= (data['end_page'] + 2); num++) {
+            if (num <= 5) {
+              if (page == num) {
+                paging += "<li class='page-item active'><a class='page-link' href='javascript:all_paging(" + num + ")'"
+                  + "'>" + num + "</a></li>"
+              } else {
+                paging += "<li class='page-item'><a class='page-link' href='javascript:all_paging(" + num + ")'"
+                  + "'>" + num + "</a></li>"
+              }
+            }
+          }
+          paging += "<li class='page-item'><a class='page-link' href='javascript:all_paging(" + 6 + ")'>Next</a></li>"
+        } else if (page >= data['end_page']) {
+          paging += "<li class='page-item'><a class='page-link' href='javascript:all_paging(" + (data['end_page'] - 3) + ")'>Previous</a></li>"
+          for (num = 1; num <= (data['end_page'] + 2); num++) {
+            if (num >= (data['end_page'] - 2)) {
+              if (page == num) {
+                paging += "<li class='page-item active'><a class='page-link' href='javascript:all_paging(" + num + ")'"
+                  + "'>" + num + "</a></li>"
+              } else {
+                paging += "<li class='page-item'><a class='page-link' href='javascript:all_paging(" + num + ")'"
+                  + "'>" + num + "</a></li>"
+              }
+            }
+          }
+          paging += "<li class='page-item disabled'><a class='page-link' href='javascript:all_paging(" + 6 + ")'>Next</a></li>"
+        } else {
+          paging += "<li class='page-item'><a class='page-link' href='javascript:all_paging(" + (page - 3) + ")'>Previous</a></li>"
+          for (num = 1; num <= (data['end_page'] + 2); num++) {
+            if ((num >= page - 2) && (num <= page + 2)) {
+              if (page == num) {
+                paging += "<li class='page-item active'><a class='page-link' href='javascript:all_paging(" + num + ")'"
+                  + "'>" + num + "</a></li>"
+              } else {
+                paging += "<li class='page-item'><a class='page-link' href='javascript:all_paging(" + num + ")'"
+                  + "'>" + num + "</a></li>"
+              }
+            }
+          }
+          paging += "<li class='page-item'><a class='page-link' href='javascript:all_paging(" + (page + 3) + ")'>Previous</a></li>"
+        }
+        document.getElementById('board_all').innerHTML = paging
+
+        for (i = 0; i < data['articles'].length; i++) {
+          table += "<tr align='center' style='border-bottom: 1px solid #a8afad;'>"
+            + "<td>" + data['articles'][i]['id'] + "</td>"
+            + "<td align='left'><a class='text-dark' id='comment_title_" + i + "' href='javascript:detail(" + data['articles'][i]['id'] +")' style='text-decoration: none;'>" + data['articles'][i]['title']
+            + "<b style='color: red;'> [" + data['articles'][i]['comments'] + "]</b></a></td>"
+            + "<td><a class='text-dark' href='javascript:profile(" + data['articles'][i]['user'] + ")' style='text-decoration: none;' id='article_user_name_"+i+"'>" + data['articles'][i]['user'] + "</a></td>"
+            + "<td>" + data['articles'][i]['date'] + "</td>"
+            + "<td>" + data['articles'][i]['hits'] + "</td>"
+            + "<td>" + data['articles'][i]['likes'] + "</td>"
+        }
+        document.getElementById('mydatalist').innerHTML = table
+        for (i = 0; i < data['articles'].length; i++) {
+          const titleTag = document.getElementById('comment_title_' + i)
+          titleTag.innerText = data['articles'][i]['title']
+          titleTag.setAttribute('href',`javascript:detail(${data['articles'][i]['id']},'${data['articles'][i]['title']}')`)
+          const b = document.createElement('b')
+          b.innerText = ` [${data['articles'][i]['comments']}]`
+          b.style.color = 'red'
+          titleTag.appendChild(b)
+          const userTag = document.getElementById('article_user_name_'+i)
+          userTag.setAttribute('href',`javascript:profile('${data['articles'][i]['user']}')`)
+          if(data['articles'][i]['nickname']){
+            userTag.innerText = data['articles'][i]['nickname']
+          }
+        }
+      }
+    });
+  }
+
+
+
+</script>

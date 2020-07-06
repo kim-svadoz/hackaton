@@ -1,0 +1,196 @@
+<div class="row pt-5">
+  <div class="col-xl-8">
+    <textarea id="senti_check" name="content"></textarea>
+    <script>
+      $('#senti_check').summernote({
+        placeholder: '감성 분석을 원하는 문장을 입력해 주세요.',
+        disableDragAndDrop: true,
+        toolbar: false,
+        tabsize: 2,
+        height: 400,
+        focus: true,
+      });
+    </script>
+    <br>
+    <div class="row">
+      <div class="col-xl-12">
+        <button class="btn btn-primary float-right" type="button" onclick="senti_check()">검사하기</button>
+      </div>
+    </div>
+    <div class="row mt-5">
+      <div class="col-xl-12">
+        <div id="senti_check_table" style="visibility: hidden;">
+          <input class="form-control" id="myInput2" type="text" placeholder="Search..">
+          <br>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Word</th>
+                <th>Senti</th>
+                <th>Prop</th>
+                <th>Intensity</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody id="myTable2">
+            </tbody>
+          </table>
+          <div class="row">
+            <div class="col-xl-6">
+              <button class="btn btn-secondary btn-block" onclick="senti_check_more()">더 보기</button>
+            </div>
+            <div class="col-xl-6">
+              <button class="btn btn-secondary btn-block" onclick="senti_check_all()">모두보기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4 pr-5">
+    <div class="spinner-border text-primary" id="senti_check_loading"
+      style="position: absolute;top: 0;visibility: hidden;"></div>
+    <div class="row" id="senti_result" style="visibility: hidden;">
+      <div class="col-xl-5">
+        <p class="text-right">긍정점수 :</p>
+        <p class="text-right">부정점수 :</p>
+      </div>
+      <div class="col-xl-7">
+        <p id="pos_p" class="text-left"></p>
+        <p id="neg_p" class="text-left"></p>
+      </div>
+      <div class="col-xl-6 p-0 progress w-25">
+        <div class="progress-bar bg-danger ml-auto" id="neg_pb" style="width:0%"></div>
+      </div>
+      <div class="col-xl-6 p-0 progress w-25">
+        <div class="progress-bar bg-success" id="pos_pb" style="width:0%"></div>
+      </div>
+      <div class="col-xl-12 pt-5" id="total_pb">
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    $(document).ready(function () {
+      $("#myInput2").on("keyup", function () {
+        var value = $(this).val().toLowerCase();
+        $("#myTable2 tr").filter(function () {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+      });
+    });
+  </script>
+</div>
+
+<script>
+  var len;
+  var words;
+  function senti_check() {
+    len = 10;
+    var text = "";
+    for (var i = 0; i < document.getElementsByClassName('note-editable')[3].getElementsByTagName('p').length; i++) {
+      text += document.getElementsByClassName('note-editable')[3].getElementsByTagName('p')[i].innerText + "\n"
+    }
+    $.ajaxSetup({
+      cache: false
+    });
+    $.ajax({
+      cache: false,
+      beforeSend: function (xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+          xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+        document.getElementById('senti_check_loading').setAttribute('style', 'position: absolute;top: 0;visibility: visible;')
+        document.getElementById('senti_check_table').setAttribute('style', 'visibility: hidden;')
+        document.getElementById('senti_result').setAttribute('style', 'visibility: hidden;')
+      },
+
+      url: "{% url 'analysis:senti_check' %}",
+      type: "post",
+      data: {
+        'data': text,
+      },
+      success: function (data) {
+        words = data['pos']
+        document.getElementById('senti_check_loading').setAttribute('style', 'position: absolute;top: 0;visibility: hidden;')
+        document.getElementById('senti_check_table').setAttribute('style', 'visibility: visible;')
+        document.getElementById('senti_result').setAttribute('style', 'visibility: visible;')
+        document.getElementById('pos_p').innerText = data['pos_p']
+        document.getElementById('neg_p').innerText = data['neg_p']
+
+        if (data['total'] >= 0) {
+          document.getElementById('pos_pb').setAttribute('style', 'width:' + data['total'] + '%')
+          document.getElementById('neg_pb').setAttribute('style', 'width:0%')
+          document.getElementById('total_pb').innerHTML = "<p style='display:inline'>전체 단어 중 " + "<h4 class='text-success' style='display:inline'>" + data['total'] + "% </h4>" + "이상</p> <p>긍정적인 표현이 사용되었습니다.</p>"
+        } else {
+          document.getElementById('pos_pb').setAttribute('style', 'width:0%')
+          document.getElementById('neg_pb').setAttribute('style', 'width:' + (-data['total']) + '%')
+          document.getElementById('total_pb').innerHTML = "<p style='display:inline'>전체 단어 중 " + "<h4 class='text-danger' style='display:inline'>" + (-data['total']) + "% </h4>" + "이상</p> <p>부정적인 표현이 사용되었습니다.</p>"
+        }
+        var table = "";
+        if (len >= data['pos'].length) {
+          len = data['pos'].length;
+        }
+        for (var i = 0; i < len; i++) {
+          table += "<tr>"
+            + "<td>" + data['pos'][i][0] + "</td>"
+            + "<td>" + data['pos'][i][1] + "</td>"
+            + "<td>" + data['pos'][i][2] + "</td>"
+            + "<td>" + data['pos'][i][3] + "</td>"
+            + "<td>" + data['pos'][i][4] + "</td>"
+            + "</tr>"
+        };
+        document.getElementById('myTable2').innerHTML = table
+      }
+
+    })
+  }
+  function senti_check_more() {
+    len += 10;
+    $.ajax({
+      cache: false,
+      type: "get",
+      data: {
+      },
+      success: function (data) {
+        var table = "";
+        if (len >= words.length) {
+          len = words.length;
+        }
+        for (var i = 0; i < len; i++) {
+          table += "<tr>"
+            + "<td>" + words[i][0] + "</td>"
+            + "<td>" + words[i][1] + "</td>"
+            + "<td>" + words[i][2] + "</td>"
+            + "<td>" + words[i][3] + "</td>"
+            + "<td>" + words[i][4] + "</td>"
+            + "</tr>"
+        };
+        document.getElementById('myTable2').innerHTML = table
+      }
+    });
+  }
+  function senti_check_all() {
+    len = words.length;
+    $.ajax({
+      cache: false,
+      type: "get",
+      data: {
+      },
+      success: function (data) {
+        var table = "";
+        for (var i = 0; i < len; i++) {
+          table += "<tr>"
+            + "<td>" + words[i][0] + "</td>"
+            + "<td>" + words[i][1] + "</td>"
+            + "<td>" + words[i][2] + "</td>"
+            + "<td>" + words[i][3] + "</td>"
+            + "<td>" + words[i][4] + "</td>"
+            + "</tr>"
+        };
+        document.getElementById('myTable2').innerHTML = table
+      }
+    });
+  }
+</script>

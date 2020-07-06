@@ -1,0 +1,83 @@
+{% load static %}
+<div class="#fixed-top">
+  <nav class="">
+    <ul class="nav bg-white">
+      <li class="nav-item bg-secondary">
+        <a class="nav-link text-white" href="#" style="font-size: 35px;">GRAY</a>
+      </li>
+      <li class="nav-item" style="align-self: flex-end; font-size: 18px;">
+        <a class="nav-link text-secondary" href="https://jasoseol.com/" target="_blank">자소설닷컴</a>
+      </li>
+      <li class="nav-item" style="align-self: flex-end; font-size: 18px;">
+        <a class="nav-link text-secondary" href="https://www.saramin.co.kr/zf_user/" target="_blank">사람인</a>
+      </li>
+      <li class="nav-item" style="align-self: flex-end; font-size: 18px;">
+        <a class="nav-link text-secondary" href="https://www.jobplanet.co.kr/contents" target="_blank">잡플래닛</a>
+      </li>
+      <li class="nav-item" style="align-self: flex-end; font-size: 18px;">
+        <a class="nav-link text-secondary" href="https://www.jobkorea.co.kr/" target="_blank">잡코리아</a>
+      </li>
+      <div class="mr-4 ml-auto mt-auto">
+        <ul class="nav bg-white">
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            {% if user.profile.image %}
+            <img class="rounded-circle" src="{{ user.profile.image.url }}" width="50px"
+              alt="{{ user.profile.image }}">
+            {% else %}
+            <img class="rounded-circle" src="{% static 'accounts/images/man.jpg' %}" width="50px" alt="">
+            {% endif %}
+          </li>
+          <li class="nav-item ml-1" style="align-self: flex-end; font-size: 18px; font-weight: 500;">
+            {% if user.profile.nickname %}
+            <button class="btn dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="true" style="font-size: 18px;">
+              {{ user.profile.nickname }}
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <a class="dropdown-item" href="{% url 'accounts:logout' %}">로그아웃</a>
+              <a class="dropdown-item" href="{% url 'accounts:profile' user.username %}">프로필보기</a>
+              <a class="dropdown-item" href="{% url 'accounts:update' %}">개인정보 수정</a>
+              <a class="dropdown-item" href="{% url 'accounts:profile_update' %}">프로필 수정</a>
+              <a class="dropdown-item" href="{% url 'accounts:delete' %}">회원 탈퇴</a>
+            </div>
+            {% else %}
+
+            <button class="btn dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="true" style="font-size: 18px;">
+              {{ user.username }}
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <a class="dropdown-item" href="{% url 'accounts:logout' %}">로그아웃</a>
+              <a class="dropdown-item" href="{% url 'accounts:profile' user.username %}">프로필보기</a>
+              <a class="dropdown-item" href="{% url 'accounts:update' %}">개인정보 수정</a>
+              <a class="dropdown-item" href="{% url 'accounts:profile_update' %}">프로필 수정</a>
+              <a class="dropdown-item" href="{% url 'accounts:delete' %}">회원 탈퇴</a>
+            </div>
+
+
+            {% endif %}
+          </li>
+          {% else %}
+          <li class="nav-item" style="align-self: flex-end; font-size: 18px;">
+            <a class="nav-link text-secondary" href="{% url 'accounts:login' %}">로그인</a>
+          </li>
+          <li class="nav-item" style="align-self: flex-end; font-size: 18px;">
+            <a class="nav-link text-secondary" href="{% url 'accounts:signup' %}">회원가입</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </ul>
+  </nav>
+  <nav class="navbar navbar-expand-sm bg-secondary navbar-light">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link text-white " href="#" onclick="analysis()">Analysis</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" href="#" onclick="community()">Community</a>
+      </li>
+    </ul>
+  </nav>
+</div>

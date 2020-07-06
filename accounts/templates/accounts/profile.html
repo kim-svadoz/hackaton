@@ -1,0 +1,192 @@
+{% extends 'base_accounts1.html' %}
+{% load bootstrap4 %}
+
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+  integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+  integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+  integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+{% endblock%}
+
+{% block body %}
+<div class="">
+  <div class="container">
+    <div class="row p-5">
+      <div class="col-xl-12">
+        <div class="row border rounded-lg p-5">
+          <div class="col-xl-3">
+
+            {% if person.profile.image %}
+            <img src="{{ person.profile.image.url}}" width=120, alt="{{ person.profile.image }}">
+            <br />
+            <br />
+            {% endif %}
+            <h1 style="font-size: vi;">
+              {% if person.profile.nickname %}
+              {{ person.profile.nickname }}
+              {% else %}
+              {{ person.username }}
+              {% endif %}
+            </h1>
+            <br>
+            <span>받은 채택 수 : </span><span style="font-size: larger;">{{ selected.count }}</span>
+            <br />
+            <br />
+            <span>받은 좋아요 : </span><span style="font-size: larger;">{{ like }}</span>
+          </div>
+          <div class="col-xl-9">
+            <h2> 소개 </h2>
+            <hr />
+            <div>
+              {{ person.profile.introduction | safe }}
+            </div>
+            <br />
+            <hr />
+            <br />
+            <br />
+            <h2> 작성한 게시물</h2>
+            <table class="table" style="font-size: 1vmax">
+              <thead>
+                <tr>
+                  <th width="5%" style="text-align: center">#</th>
+                  <th width="35%">제목</th>
+                  <th width="15%" style="text-align: center">작성자</th>
+                  <th width="15%" style="text-align: center">작성일</th>
+                  <th width="15%" style="text-align: center">조회수</th>
+                  <th width="15%" style="text-align: center">좋아요</th>
+                </tr>
+              </thead>
+              <tbody id="mydatalist">
+                {% for article in articles %}
+                <tr align="center" style="border-bottom: 1px solid #a8afad;">
+                  <td>{{ article.pk }}</td>
+                  <td align="left"><a class="text-dark" href="javascript:detail({{article.pk}}, '{{article.title}}')"
+                      style="text-decoration: none;">{{ article.title }} <b
+                        style="color: red;">[{{  article.comment_set.all|length }}]</b></a>
+                  </td>
+                  {% if article.user.profile.nickname %}
+                  <td><a class="text-dark" href="javascript:profile('{{article.user}}')"
+                      style="text-decoration: none;">{{ article.user.profile.nickname }}</a></td>
+                  {% else %}
+                  <td><a class="text-dark" href="javascript:profile('{{article.user}}')"
+                      style="text-decoration: none;">{{ article.user }}</a></td>
+                  {% endif %}
+                  <td>{{ article.updated_at|date:'Y/n/j' }}</td>
+                  <td>{{ article.hits }}</td>
+                  <td>{{ article.like_users.all|length }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <br />
+            <br />
+            <h2> 채택 받은 게시물</h2>
+            <table class="table" style="font-size: 1vmax">
+              <thead>
+                <tr>
+                  <th width="5%" style="text-align: center">#</th>
+                  <th width="35%">제목</th>
+                  <th width="15%" style="text-align: center">작성자</th>
+                  <th width="15%" style="text-align: center">작성일</th>
+                  <th width="15%" style="text-align: center">조회수</th>
+                  <th width="15%" style="text-align: center">좋아요</th>
+                </tr>
+              </thead>
+              <tbody id="mydatalist">
+                {% for article in selected %}
+                <tr align="center" style="border-bottom: 1px solid #a8afad;">
+                  <td>{{ article.pk }}</td>
+                  <td align="left"><a class="text-dark" href="javascript:detail({{article.pk}}, '{{article.title}}')"
+                      style="text-decoration: none;">{{ article.title }} <b
+                        style="color: red;">[{{  article.comment_set.all|length }}]</b></a>
+                  </td>
+                  {% if article.user.profile.nickname %}
+                  <td><a class="text-dark" href="javascript:profile('{{article.user}}')"
+                      style="text-decoration: none;">{{ article.user.profile.nickname }}</a></td>
+                  {% else %}
+                  <td><a class="text-dark" href="javascript:profile('{{article.user}}')"
+                      style="text-decoration: none;">{{ article.user }}</a></td>
+                  {% endif %}
+                  <td>{{ article.updated_at|date:'Y/n/j' }}</td>
+                  <td>{{ article.hits }}</td>
+                  <td>{{ article.like_users.all|length }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <br />
+            <br />
+            <h2> 좋아요 누른 게시물</h2>
+            <table class="table" style="font-size: 1vmax">
+              <thead>
+                <tr>
+                  <th width="5%" style="text-align: center">#</th>
+                  <th width="35%">제목</th>
+                  <th width="15%" style="text-align: center">작성자</th>
+                  <th width="15%" style="text-align: center">작성일</th>
+                  <th width="15%" style="text-align: center">조회수</th>
+                  <th width="15%" style="text-align: center">좋아요</th>
+                </tr>
+              </thead>
+              <tbody id="mydatalist">
+                {% for article in liked %}
+                <tr align="center" style="border-bottom: 1px solid #a8afad;">
+                  <td>{{ article.pk }}</td>
+                  <td align="left"><a class="text-dark" href="javascript:detail({{article.pk}}, '{{article.title}}')"
+                      style="text-decoration: none;">{{ article.title }} <b
+                        style="color: red;">[{{  article.comment_set.all|length }}]</b></a>
+                  </td>
+                  {% if article.user.profile.nickname %}
+                  <td><a class="text-dark" href="javascript:profile('{{article.user}}')"
+                      style="text-decoration: none;">{{ article.user.profile.nickname }}</a></td>
+                  {% else %}
+                  <td><a class="text-dark" href="javascript:profile('{{article.user}}')"
+                      style="text-decoration: none;">{{ article.user }}</a></td>
+                  {% endif %}
+                  <td>{{ article.updated_at|date:'Y/n/j' }}</td>
+                  <td>{{ article.hits }}</td>
+                  <td>{{ article.like_users.all|length }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <br />
+            <br />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row p-3">
+      <div class="col-xl-12">
+        {% buttons %}
+        {% if person == user %}
+        <a href="{% url 'accounts:profile_update' %}" class="btn btn-primary "
+          style="float:right; font-size: 20px;">수정하기</a>
+        {% endif %}
+        <a href="{% url 'accounts:index' %}" class="btn btn-primary  mr-3"
+          style="float: right; font-size: 20px;">돌아가기</a>
+
+        {% endbuttons %}
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function detail(id, title) {
+    $.ajax({
+      beforeSend: function (xhr, settings) {
+        win = window.open("/community/" + id + "/detail")
+      },
+      cache: false,
+      success: function () {
+        win.document.title = title
+      }
+    })
+  }
+</script>
+{% endblock %}

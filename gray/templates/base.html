@@ -1,0 +1,175 @@
+{% load bootstrap4 %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gray</title>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+  <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+  <!-- summernote 충돌방지 css, js -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
+  <!-- swiper를 위한 css, js  -->
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <script src="https://kit.fontawesome.com/cfae7cf239.js" crossorigin="anonymous"></script>
+  <script>
+    /* csrf_token을 ajax에서 사용하기 위해 작성 */
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+    function csrfSafeMethod(method) {
+      // these HTTP methods do not require CSRF protection
+      return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+  </script>
+  <script type="text/javascript">
+
+    window.onload = function () {
+      {% if request.resolver_match.url_name == "analysis" %}
+      document.getElementById('analysis').setAttribute('class', 'collapse show');
+      {% elif request.resolver_match.url_name == "index" %}
+      document.getElementById('community').setAttribute('class', 'collapse show');
+      {% elif request.resolver_match.url_name == "search" %}
+      document.getElementById('community').setAttribute('class', 'collapse show');
+      {% elif request.resolver_match.url_name == "create" %}
+      document.getElementById('community').setAttribute('class', 'collapse show');
+      {% elif request.resolver_match.url_name == "detail" %}
+      document.getElementById('community').setAttribute('class', 'collapse show');
+      {% endif %}
+    }
+
+    function community() {
+      $.ajax({
+        type: "get",
+        success: function (data) {
+          document.getElementById('analysis').setAttribute('class', 'collapse');
+          document.getElementById('community').setAttribute('class', 'collapse show');
+          window.location.href = "{% url 'community:index' %}"
+
+        }
+      })
+    }
+    function analysis() {
+      $.ajax({
+        type: "get",
+        success: function (data) {
+          window.location.href = "{% url 'analysis:analysis' %}"
+          document.getElementById('community').setAttribute('class', 'collapse');
+          document.getElementById('analysis').setAttribute('class', 'collapse show');
+        }
+      })
+    }
+
+  </script>
+  <style>
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    .swiper-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .swiper-slide {
+      text-align: center;
+      font-size: 18px;
+      background: #fff;
+
+      /* Center slide text vertically */
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      -webkit-box-pack: center;
+      -ms-flex-pack: center;
+      -webkit-justify-content: center;
+      justify-content: center;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      -webkit-align-items: center;
+      align-items: center;
+
+    }
+
+    #id_content {
+      height: 100px;
+      width: inherit;
+    }
+
+    #f .form-group {
+      margin-bottom: 0px;
+      width: 100%;
+    }
+  </style>
+  {% block head %}
+  {% endblock %}
+</head>
+
+<body class="bg-secondary" style="overflow:visible">
+
+  <!-- 로그인관련 화면, 성현Nav -->
+
+  {% include '_fixed_top.html' %}
+
+  <div class="container-fluid">
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible">
+      {{ message.message }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    <!-- <div class="row bg-white mt-4 mx-2"> -->
+    <div class="row">
+      <div class="col-xl-2">
+        {% include '_left_menu.html' %}
+      </div>
+      <div class="col-xl-8">
+        <div class="bg-white mt-4 pb-5 rounded-lg" style="height:auto;">
+          {% block body %}
+          {% endblock %}
+        </div>
+      </div>
+      <div class="col-xl-2 " style="height: 550px; position: sticky; top:50px;">
+        {% include '_right_youtube.html' %}
+      </div>
+    </div>
+  </div>
+  </div>
+
+
+
+</body>
+
+</html>

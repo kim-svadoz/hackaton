@@ -1,0 +1,1 @@
+default_app_config = 'analysis.senti_dict.MyAppConfig'

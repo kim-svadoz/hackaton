@@ -1,0 +1,54 @@
+<!-- Swiper -->
+<div class="swiper-container mt-4">
+
+  <div class="swiper-wrapper">
+    {% for data in youtube %}
+
+    <div class="swiper-slide">
+      <a class="text-secondary" href="https://www.youtube.com/watch?v={{data.3}}" style="text-decoration: none;"
+        target="_blank">
+        <div>
+          <img class="card-img-top" src="{{data.0}}" alt="{{data.1}}">
+          <p class="text-right"
+            style="margin-top:5px; margin-bottom: 5px; margin-right:10px;  font-size: 10px;">{{data.2}}</p>
+          <p class="text-left"
+            style="margin-top:3px; margin-bottom: 5px; margin-left:10px; font-size: 12px; color:black;">
+            {{data.1|truncatechars:20}}</p>
+        </div>
+      </a>
+    </div>
+
+    {% endfor %}
+  </div>
+
+  <!-- Add Pagination -->
+  <!-- <div class="swiper-pagination"></div> -->
+  <!-- Add Arrows -->
+  <!-- <div class="swiper-button-next"></div>
+  <div class="swiper-button-prev"></div> -->
+
+</div>
+<script>
+  var swiper = new Swiper('.swiper-container', {
+    direction: 'vertical',
+    slidesPerView: 'auto',
+    slidesPerView: 3,
+    spaceBetween: 20,
+    slidesPerGroup: 2,
+    loop: true,
+    mousewheel: true,
+    centeredSlides: true,
+    freeMode: true,
+    autoplay: {
+      delay: 2500,
+      disableOnInteraction: false,
+    },
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: true,
+    },
+    navigation: {
+      nextEl: '.swiper-button-next',
+    },
+  });
+</script>
