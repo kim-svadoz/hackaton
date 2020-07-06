@@ -15,22 +15,27 @@ from django.contrib import messages
 import requests
 import json
 
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+
+from allauth.account.views import SignupView
+
+
 # Create your views here.
 def index(request):
     return render(request, 'accounts/index.html')
 
 def signup(request):
     if request.user.is_authenticated:
-        return redirect('accounts:index')
+        return redirect('analysis:analysis')
     else:
         if request.method == 'POST':
             form = UserCreationForm(request.POST)
             if form.is_valid():
                 user = form.save()
+                auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 Profile.objects.create(user = user)
-                auth_login(request, user)
                 messages.success(request, '회원가입 완료')
-                return redirect('accounts:index')
+                return redirect('analysis:analysis')
             else:
                 messages.error(request, '회원가입 못했어요 엉엉~')
         else:
@@ -42,14 +47,14 @@ def signup(request):
 
 def login(request):
     if request.user.is_authenticated:
-        return redirect('accounts:index')
+        return redirect('analysis:analysis')
     else:
         if request.method == 'POST':
             form = AuthenticationForm(request, request.POST)
             if form.is_valid():
                 auth_login(request, form.get_user())
                 messages.success(request, '로그인 완료')
-                return redirect(request.GET.get('next') or 'accounts:index')
+                return redirect(request.GET.get('next') or 'analysis:analysis')
             else:
                 messages.error(request, '로그인 못했어요 엉엉~')
         else:
@@ -61,7 +66,7 @@ def login(request):
 
 def logout(request):
     auth_logout(request)
-    return redirect('accounts:index')
+    return redirect('analysis:analysis')
 
 def profile(request, username):
     person = get_object_or_404(get_user_model(), username = username)
@@ -70,8 +75,11 @@ def profile(request, username):
     }
     return render(request, 'accounts/profile.html', context)
 
+@login_required
 def profile_update(request):
-    if request.user.profile:
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    print(profile)
+    if profile:
         profile = request.user.profile
         if request.method =='POST':
             form = ProfileForm(request.POST, request.FILES, instance = profile)
@@ -94,7 +102,7 @@ def profile_update(request):
 @login_required
 def delete(request):
     request.user.delete()
-    return redirect('accounts:index')
+    return redirect('analysis:analysis')
 
 @login_required
 def update(request):
@@ -103,7 +111,7 @@ def update(request):
         if form.is_valid():
             form.save()
             messages.success(request, '개인정보 수정 완료')
-            return redirect('accounts:index')
+            return redirect('analysis:analysis')
         else:
             messages.success(request, '개인정보 수정 못했어요 엉엉~')
     else:
