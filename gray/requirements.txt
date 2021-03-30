@@ -32,7 +32,7 @@ prompt-toolkit==3.0.5
 py-hanspell==1.1
 pycodestyle==2.6.0
 pygame==1.9.6
-Pygments==2.6.1
+Pygments==2.7.4
 PySocks==1.7.1
 pytagcloud==0.3.5
 python-decouple==3.3
